@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  simulador:
+    build: .
+    container_name: simulador_ley_enfriamiento
+    command: python app/main.py
+    ports:
+      - "${PUERTO}:${PUERTO}"
+    volumes:
+      - .:/app
+    environment:
+      - MODO=${MODO}
+      - TIPO_INTERFAZ=${TIPO_INTERFAZ}
+      - PUERTO=${PUERTO}
