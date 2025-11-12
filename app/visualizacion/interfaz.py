@@ -94,9 +94,9 @@ else:
 
 # OPCIÓN: USAR MODELO SINUSOIDAL
 
-# st.markdown("---")
-# usar_sinusoidal = st.checkbox("Usar modelo sinusoidal ajustado a los datos", value=False)
-# st.markdown("---")
+st.markdown("---")
+usar_sinusoidal = st.checkbox("Usar modelo sinusoidal ajustado a los datos", value=False)
+st.markdown("---")
 
 
 # BOTÓN PARA EJECUTAR LA SIMULACIÓN
