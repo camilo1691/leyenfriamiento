@@ -67,7 +67,7 @@ if modo == "Manual":
 # 2 MODO CSV
 # ------------------------------------------------------------
 elif modo == "Archivo CSV":
-    st.subheader("📂 Cargar archivo CSV")
+    st.subheader(" Cargar archivo CSV")
     st.info("El archivo debe contener columnas: `tiempo` y `Tam` (en °C).")
 
     archivo = st.file_uploader("Selecciona tu archivo CSV", type=["csv"])
@@ -84,7 +84,7 @@ elif modo == "Archivo CSV":
 # 3 MODO AUTOMÁTICO
 #
 else:
-    st.subheader("🌤️ Modo automático")
+    st.subheader("Modo automático")
     st.info("Usa una curva ambiental típica de día y noche.")
 
     T0 = st.number_input("Temperatura inicial del cuerpo (°C):", value=90.0)
@@ -94,9 +94,9 @@ else:
 
 # OPCIÓN: USAR MODELO SINUSOIDAL
 
-st.markdown("---")
-usar_sinusoidal = st.checkbox("Usar modelo sinusoidal ajustado a los datos", value=False)
-st.markdown("---")
+# st.markdown("---")
+# usar_sinusoidal = st.checkbox("Usar modelo sinusoidal ajustado a los datos", value=False)
+# st.markdown("---")
 
 
 # BOTÓN PARA EJECUTAR LA SIMULACIÓN
