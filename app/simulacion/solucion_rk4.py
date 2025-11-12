@@ -1,48 +1,199 @@
 import numpy as np
 import pandas as pd
+from typing import Optional, List, Tuple
 
-def ejecutar_simulacion(T0=90.0, k=-0.05, t_total=5.0, Tamb=25.0, datos=None):
+# ------------------------------------------------------------
+# IMPORTS DEPENDIENTES DE LA ESTRUCTURA DEL PROYECTO
+# ------------------------------------------------------------
+
+try:
+    from procesos_datos.cargador_datos import obtener_datos
+except Exception:
+    try:
+        from app.procesos_datos.cargador_datos import obtener_datos
+    except Exception:
+        obtener_datos = None
+
+try:
+    from procesos_datos.interpolacion import temperatura_ambiente
+except Exception:
+    try:
+        from app.procesos_datos.interpolacion import temperatura_ambiente
+    except Exception:
+        temperatura_ambiente = None
+
+try:
+    from procesos_datos.ajuste_curvas import ajustar_sinusoidal
+    _AJUSTE_DISPONIBLE = True
+except Exception:
+    try:
+        from app.procesos_datos.ajuste_curvas import ajustar_sinusoidal
+        _AJUSTE_DISPONIBLE = True
+    except Exception:
+        ajustar_sinusoidal = None
+        _AJUSTE_DISPONIBLE = False
+
+
+# ------------------------------------------------------------
+# FUNCIÓN INTERNA: ECUACIÓN DIFERENCIAL DE ENFRIAMIENTO
+# ------------------------------------------------------------
+def _f_enfriamiento(Ti: float, t: float, k: float, datos: Optional[pd.DataFrame],
+                    Tam_const: float, metodo_interp: str = "lineal") -> float:
     """
-    Esto simula la Ley de Enfriamiento con el método de Runge-Kutta de 4to orden.
-    Si se pasa un DataFrame 'datos', se usa como temperatura ambiente variable.
+    Calcula la derivada dT/dt = k * (T - Tam(t))
+    """
+    if temperatura_ambiente is None:
+        Tam_t = Tam_const
+    else:
+        Tam_t = temperatura_ambiente(t, datos, default=Tam_const, metodo=metodo_interp)
+    return k * (Ti - Tam_t)
+
+
+
+# FUNCIÓN PRINCIPAL: EJECUTAR SIMULACIÓN RK4
+
+def ejecutar_simulacion(
+    T0: float = 90.0,
+    k: float = -0.05,
+    t_total: float = 5.0,
+    modo_datos: str = "automatica",
+    archivo=None,
+    lista_manual: Optional[List[Tuple[float, float]]] = None,
+    usar_sinusoidal: bool = False,
+    pasos: int = 200,
+    metodo_interp: str = "lineal",
+    Tam_const: float = 25.0
+) -> pd.DataFrame:
+    """
+    Ejecuta la simulación del enfriamiento con temperatura ambiente variable
+    usando el método RK4.
+
+    Parámetros:
+    -----------
+    T0 : float
+        Temperatura inicial del objeto (°C)
+    k : float
+        Constante de enfriamiento (negativa para enfriamiento)
+    t_total : float
+        Duración total de la simulación (horas)
+    modo_datos : str
+        Fuente de datos de temperatura ambiente: 'csv', 'manual', 'automatica'
+    archivo : str o archivo
+        Ruta o archivo CSV si modo_datos == 'csv'
+    lista_manual : list[tuple]
+        Lista de puntos [(tiempo, Tam)] si modo_datos == 'manual'
+    usar_sinusoidal : bool
+        Si True, ajusta una función sinusoidal a los datos y la usa como Tam(t)
+    pasos : int
+        Número de pasos RK4 (a mayor número, mayor precisión)
+    metodo_interp : str
+        Método de interpolación para Tam (lineal o spline)
+    Tam_const : float
+        Temperatura ambiente constante de respaldo
+
+    Retorna:
+    --------
+    pandas.DataFrame con columnas:
+        "Tiempo (h)" | "Temperatura (°C)" | "Tamiente (°C)"
     """
 
-    # Aquí defino el número de pasos que voy a usar en la simulación
-    n = 100
+    
+    # 1 Obtener los datos base
+    
+    datos = None
+    if modo_datos == "csv":
+        if obtener_datos is None:
+            raise RuntimeError("No se pudo acceder a 'obtener_datos' para modo CSV.")
+        datos = obtener_datos("csv", archivo=archivo)
 
-    # En esta línea calculo el tamaño del paso (intervalo de tiempo entre iteraciones)
-    dt = t_total / n
+    elif modo_datos == "manual":
+        if obtener_datos is None:
+            raise RuntimeError("No se pudo acceder a 'obtener_datos' para modo manual.")
+        datos = obtener_datos("manual", lista_manual=lista_manual)
 
-    # Aquí genero un arreglo con los tiempos desde 0 hasta el total, dividido en n+1 puntos
-    tiempos = np.linspace(0, t_total, n + 1)
-
-    # En esta línea creo un arreglo para guardar los valores de temperatura en cada paso
-    T = np.zeros(n + 1)
-
-    # Aquí establezco la temperatura inicial con el valor que me pasen como parámetro
-    T[0] = T0
-
-    # En este ciclo recorro cada paso del tiempo para calcular la evolución de la temperatura
-    for i in range(n):
-
-        # Si tengo datos cargados (un DataFrame) y existe la columna "Tam", uso la temperatura ambiente variable
-        if datos is not None and "Tam" in datos.columns:
-            Tambiente = float(datos.iloc[i % len(datos)]["Tam"])
-        # Si no, uso la temperatura ambiente constante que se haya pasado
+    elif modo_datos == "automatica":
+        if obtener_datos is not None:
+            datos = obtener_datos("automatica")
         else:
-            Tambiente = Tamb
+            # Generar modelo base si no hay cargador
+            tiempos = [0, 6, 12, 16, 20, 24]
+            temperaturas = [12, 15, 26, 24, 18, 14]
+            datos = pd.DataFrame({"tiempo": tiempos, "Tam": temperaturas})
 
-        # Aquí defino la función que representa la derivada de la temperatura según la Ley de Enfriamiento
-        def dTdt(Ti, t): return k * (Ti - Tambiente)
+    else:
+        raise ValueError("Modo de datos inválido. Usa: 'csv', 'manual' o 'automatica'.")
 
-        # En estas líneas aplico el método de Runge-Kutta de 4to orden para integrar la ecuación diferencial
-        k1 = dTdt(T[i], tiempos[i])
-        k2 = dTdt(T[i] + 0.5 * dt * k1, tiempos[i] + 0.5 * dt)
-        k3 = dTdt(T[i] + 0.5 * dt * k2, tiempos[i] + 0.5 * dt)
-        k4 = dTdt(T[i] + dt * k3, tiempos[i] + dt)
+    
+    # 2 Ajuste sinusoidal (opcional)
+    
+    Tam_func_ajustada = None
+    if usar_sinusoidal and _AJUSTE_DISPONIBLE:
+        try:
+            parametros, Tam_func_ajustada = ajustar_sinusoidal(datos)
+        except Exception as e:
+            print(f"⚠ No se pudo ajustar modelo sinusoidal: {e}")
+            Tam_func_ajustada = None
+    elif usar_sinusoidal:
+        print("⚠ Módulo de ajuste sinusoidal no disponible (falta scipy o ajuste_curvas).")
 
-        # Aquí actualizo el valor de la temperatura para el siguiente paso usando el promedio ponderado de las pendientes
-        T[i + 1] = T[i] + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    
+    # 3 Preparar arreglos de tiempo y temperatura
+    
+    pasos = max(10, int(pasos))
+    dt = t_total / pasos
+    tiempos = np.linspace(0.0, t_total, pasos + 1)
+    T = np.zeros(pasos + 1)
+    T[0] = float(T0)
+    Tam_usada = np.zeros(pasos + 1)
 
-    # Finalmente, retorno un DataFrame con los resultados del tiempo y la temperatura correspondiente
-    return pd.DataFrame({"Tiempo (h)": tiempos, "Temperatura (°C)": T})
+    
+    # 4 Bucle RK4 principal
+    
+    for i in range(pasos):
+        t_i = float(tiempos[i])
+
+        # Determinar Tam actual (según modo o función ajustada)
+        if Tam_func_ajustada is not None:
+            Tam_i = float(Tam_func_ajustada(t_i))
+        elif temperatura_ambiente is not None:
+            Tam_i = float(temperatura_ambiente(t_i, datos, default=Tam_const, metodo=metodo_interp))
+        else:
+            Tam_i = float(Tam_const)
+
+        Tam_usada[i] = Tam_i
+
+        def f(Ti, t):
+            if Tam_func_ajustada is not None:
+                Tam_t = float(Tam_func_ajustada(t))
+            elif temperatura_ambiente is not None:
+                Tam_t = float(temperatura_ambiente(t, datos, default=Tam_const, metodo=metodo_interp))
+            else:
+                Tam_t = float(Tam_const)
+            return k * (Ti - Tam_t)
+
+        # Método RK4
+        k1 = f(T[i], tiempos[i])
+        k2 = f(T[i] + 0.5 * dt * k1, tiempos[i] + 0.5 * dt)
+        k3 = f(T[i] + 0.5 * dt * k2, tiempos[i] + 0.5 * dt)
+        k4 = f(T[i] + dt * k3, tiempos[i] + dt)
+        T[i + 1] = T[i] + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+
+    # Último punto
+    t_last = float(tiempos[-1])
+    if Tam_func_ajustada is not None:
+        Tam_usada[-1] = float(Tam_func_ajustada(t_last))
+    elif temperatura_ambiente is not None:
+        Tam_usada[-1] = float(temperatura_ambiente(t_last, datos, default=Tam_const, metodo=metodo_interp))
+    else:
+        Tam_usada[-1] = float(Tam_const)
+
+    
+    # 5 Resultado final
+    
+    df = pd.DataFrame({
+        "Tiempo (h)": tiempos,
+        "Temperatura (°C)": T,
+        "Tamiente (°C)": Tam_usada
+    })
+
+    return df
