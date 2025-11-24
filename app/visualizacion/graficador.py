@@ -1,3 +1,4 @@
+'''
 import streamlit as st
 import matplotlib.pyplot as plt
 
@@ -22,4 +23,37 @@ def graficar_resultados(df):
     ax.grid(False)
     
     # Finalmente, en esta línea muestro la gráfica en la interfaz de Streamlit
-    st.pyplot(fig)
+    st.pyplot(fig)'''
+
+import streamlit as st
+import plotly.graph_objects as go
+
+def graficar_resultados(df):
+    fig = go.Figure()
+
+    # Línea 1
+    fig.add_trace(go.Scatter(
+        x=df["Tiempo (h)"],
+        y=df["Temperatura (°C)"],
+        mode="lines+markers",
+        name="Temperatura real",   # 👈 Notación (nombre en la leyenda)
+        hovertemplate="<b>Tiempo:</b> %{x} h<br><b>Temp real:</b> %{y} °C<extra></extra>"
+    ))
+
+    # Línea 2
+    fig.add_trace(go.Scatter(
+        x=df["Tiempo (h)"],
+        y=df["Temperatura estimada (°C)"],
+        mode="lines+markers",
+        name="Temperatura estimada",   # 👈 Notación
+        hovertemplate="<b>Tiempo:</b> %{x} h<br><b>Temp estimada:</b> %{y} °C<extra></extra>"
+    ))
+
+    fig.update_layout(
+        title="Comparación de Temperaturas",
+        xaxis_title="Tiempo (h)",
+        yaxis_title="Temperatura (°C)",
+        legend_title="Leyenda"  # 👈 Título del cuadro de notaciones
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
