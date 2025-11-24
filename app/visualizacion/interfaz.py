@@ -35,7 +35,7 @@ de temperatura ambiente, aplicando el método numérico de **Runge-Kutta (RK4)**
 # ------------------------------------------------------------
 modo = st.radio(
     "Selecciona el modo de ingreso de datos:",
-    ["Manual", "Archivo CSV", "Automático"],
+    ["Manual", "Automático"],    # "Archivo CSV", lo retiro por el momento para que no se vea en la interfaz
     horizontal=True
 )
 
@@ -57,8 +57,8 @@ if modo == "Manual":
     st.info("Agrega los valores de temperatura ambiente a lo largo del día.")
 
     data_inicial = pd.DataFrame({
-        "tiempo": [0, 6, 12, 18, 24],
-        "Tam": [15, 18, 25, 20, 16]
+        "tiempo": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+        "Tam": [12.2, 11.7, 11.7, 11.1, 10.6, 10.6, 10.0, 11.1, 13.3, 15.6, 17.8, 17.8, 17.8, 17.8, 17.2, 16.7, 16.1, 15.6, 14.4, 14.4, 13.9, 13.3, 12.2, 12.2]
     })
     tabla = st.data_editor(data_inicial, num_rows="dynamic", use_container_width=True)
     lista_manual = list(zip(tabla["tiempo"], tabla["Tam"]))
@@ -84,7 +84,7 @@ elif modo == "Archivo CSV":
 # 3 MODO AUTOMÁTICO
 #
 else:
-    st.subheader("🌤️ Modo automático")
+    st.subheader("Modo automático")
     st.info("Usa una curva ambiental típica de día y noche.")
 
     T0 = st.number_input("Temperatura inicial del cuerpo (°C):", value=90.0)

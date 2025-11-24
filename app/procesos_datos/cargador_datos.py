@@ -67,10 +67,10 @@ def generar_modelo_variable_por_defecto():
     """
 
     # Definimos los horarios del día que nos interesan (en horas)
-    tiempos = [0, 6, 12, 16, 20, 24]
+    tiempos = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     
     # Definimos las temperaturas correspondientes a cada hora
-    temperaturas = [12, 15, 26, 24, 18, 14]
+    temperaturas = [12.2, 11.7, 11.7, 11.1, 10.6, 10.6, 10.0, 11.1, 13.3, 15.6, 17.8, 17.8, 17.8, 17.8, 17.2, 16.7, 16.1, 15.6, 14.4, 14.4, 13.9, 13.3, 12.2, 12.2]
 
     # Creamos una tabla con estos datos
     df = pd.DataFrame({
