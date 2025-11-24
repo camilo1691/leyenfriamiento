@@ -50,7 +50,7 @@ if modo == "Manual":
     st.subheader(" Ingreso manual de parámetros")
 
     T0 = st.number_input("Temperatura inicial (°C):", value=90.0)
-    k = st.number_input("Constante de enfriamiento (k):", value=-0.05, step=0.01)
+    k = st.number_input("Constante de enfriamiento (k):", value=-0.16, step=0.01)
     t_total = st.number_input("Duración total (horas):", value=10.0)
 
     st.markdown("#### Ingreso de temperaturas ambientales (horas vs °C)")
@@ -77,7 +77,7 @@ elif modo == "Archivo CSV":
         st.dataframe(datos_csv.head())
 
     T0 = st.number_input("Temperatura inicial del cuerpo (°C):", value=85.0)
-    k = st.number_input("Constante de enfriamiento (k):", value=-0.05, step=0.01)
+    k = st.number_input("Constante de enfriamiento (k):", value=-0.12, step=0.01)
     t_total = st.number_input("Duración total (horas):", value=8.0)
 
 #
@@ -88,7 +88,7 @@ else:
     st.info("Usa una curva ambiental típica de día y noche.")
 
     T0 = st.number_input("Temperatura inicial del cuerpo (°C):", value=90.0)
-    k = st.number_input("Constante de enfriamiento (k):", value=-0.06, step=0.01)
+    k = st.number_input("Constante de enfriamiento (k):", value=-0.12, step=0.01)
     t_total = st.number_input("Duración total (horas):", value=24.0)
 
 

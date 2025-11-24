@@ -8,7 +8,7 @@ from app.simulacion.solucion_rk4 import ejecutar_simulacion
 print("\n--- Prueba 1: Modo automático ---")
 df_auto = ejecutar_simulacion(
     T0=85.0,
-    k=-0.07,
+    k=-0.12,
     t_total=10.0,
     modo_datos="automatica",
     pasos=200
@@ -33,7 +33,7 @@ lista_manual = [
 ]
 df_manual = ejecutar_simulacion(
     T0=90.0,
-    k=-0.06,
+    k=-0.11,
     t_total=12.0,
     modo_datos="manual",
     lista_manual=lista_manual,
@@ -52,7 +52,7 @@ try:
     archivo = "temperaturas.csv"  # cambia por el nombre real si existe
     df_csv = ejecutar_simulacion(
         T0=95.0,
-        k=-0.05,
+        k=-0.14,
         t_total=8.0,
         modo_datos="csv",
         archivo=archivo,
@@ -72,7 +72,7 @@ try:
     print("\n--- Prueba 4: Modo automático con ajuste sinusoidal ---")
     df_sin = ejecutar_simulacion(
         T0=80.0,
-        k=-0.08,
+        k=-0.16,
         t_total=24.0,
         modo_datos="automatica",
         usar_sinusoidal=True,

@@ -54,7 +54,7 @@ def _f_enfriamiento(Ti: float, t: float, k: float, datos: Optional[pd.DataFrame]
 
 def ejecutar_simulacion(
     T0: float = 90.0,
-    k: float = -0.05,
+    k: float = -0.13,
     t_total: float = 5.0,
     modo_datos: str = "automatica",
     archivo=None,
