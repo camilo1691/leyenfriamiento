@@ -1,0 +1,30 @@
+flowchart TD
+    %% Flujo generado 2025-11-24T13:20:55.702682
+    Start((INICIO)):::start
+    N1["../app/main.py"]:::process
+    Start --> N1
+    N2["../app/visualizacion/graficador.py"]:::process
+    N1 --> N2
+    F3[graficar_resultados]:::function
+    N2 --> F3
+    N4["../app/visualizacion/interfaz.py"]:::process
+    N2 --> N4
+    N5["../app/simulacion/solucion_rk4.py"]:::imported
+    N4 -.->|usa| N5
+    N6["generador_documentacion_ultra.py"]:::process
+    N4 --> N6
+    F7[setup_logging]:::function
+    N6 --> F7
+    F8[safe_read_text]:::function
+    N6 --> F8
+    F9[check_mermaid_cli]:::function
+    N6 --> F9
+    EndNode((FIN)):::endstyle
+    N6 --> EndNode
+
+    classDef start fill:#76b852,color:#fff;
+    classDef endstyle fill:#d9534f,color:#fff;
+    classDef process fill:#2b7a78,color:#fff;
+    classDef function fill:#0174a8,color:#fff;
+    classDef imported fill:#f0ad4e,color:#000;
+    

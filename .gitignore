@@ -1,0 +1,4 @@
+echo "docs_auto/" >> .gitignore
+echo "documentacion_completa/" >> .gitignore
+echo "__pycache__/" >> .gitignore
+echo "*.pyc" >> .gitignore
