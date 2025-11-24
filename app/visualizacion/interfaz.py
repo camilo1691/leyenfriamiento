@@ -67,7 +67,7 @@ if modo == "Manual":
 # 2 MODO CSV
 # ------------------------------------------------------------
 elif modo == "Archivo CSV":
-    st.subheader("📂 Cargar archivo CSV")
+    st.subheader(" Cargar archivo CSV")
     st.info("El archivo debe contener columnas: `tiempo` y `Tam` (en °C).")
 
     archivo = st.file_uploader("Selecciona tu archivo CSV", type=["csv"])
